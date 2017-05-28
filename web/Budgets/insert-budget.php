@@ -3,12 +3,24 @@ session_start();
 ?>
 
 <?php
-// Set session variables
 if ($_POST["username"] != "") {
 $_SESSION["username"] = $_POST["username"];
-$_SESSION["password"] = $_POST["password"];
 }
-$username =  '\'' . $_SESSION["username"] . '\'';
+
+$username =  $_SESSION["username"];
+$user_id = $_SESSION["user_id"];
+$budget_name = $_POST["budget_name"];
+$goal = $_POST["goal"];
+$end_date = $_POST["end_date"];
+
+$isWrong = false;
+
+/*echo "username = $username \n";
+echo "budget_name = $budget_name  \n";
+echo "goal = $goal \n";
+echo "end_date = $end_date \n";
+echo "user_id = $user_id \n";*/
+
 ?>
 
 <?php 
@@ -21,6 +33,7 @@ if (empty($dbUrl)) {
 }// you need to edit this for your local postgress
 
 $dbopts = parse_url($dbUrl);
+
 
 $dbHost = $dbopts["host"];
 $dbPort = $dbopts["port"];
@@ -37,6 +50,53 @@ catch (PDOException $ex) {
 }
 ?>
 
+<?php
+
+    $query = 'INSERT INTO budgetCategories (user_id, budget_name) VALUES(:user_id, :budget_name)';
+    $statement = $db->prepare($query);
+
+    $statement->bindValue(':user_id', $user_id);
+    $statement->bindValue(':budget_name', $budget_name);
+
+    $statement->execute();
+
+    //$budgetId = $db->lastInsertId('budgetCategories_id_seq');
+    $statement = $db->prepare("SELECT id FROM budgetCategories");
+    $statement->execute();
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC))
+    {
+      $budgetId = $row['id'];
+    }
+
+    /*echo "username = $username \n";
+    echo "budget_name = $budget_name  \n";
+    echo "goal = $goal \n";
+    echo "end_date = $end_date \n";
+    echo "user_id = $user_id \n";
+    //echo "budget_category_id = $budgetId \n";
+    echo "budget_category_id = $budgetId \n";*/
+
+    $query = 'INSERT INTO budget_expected (user_id, budget_category_id, goal, end_date) VALUES(:user_id, :budget_category_id, :goal, :end_date)';
+    $statement = $db->prepare($query);
+
+    $statement->bindValue(':user_id', $user_id);
+    $statement->bindValue(':budget_category_id', $budgetId);
+    $statement->bindValue(':goal', $goal);
+    $statement->bindValue(':end_date', $end_date);
+
+    $statement->execute();
+
+    $query = 'INSERT INTO budget_actual (user_id, budget_category_id, money_spent, date_payed) VALUES(:user_id, :budget_category_id, :money_spent, :date_payed)';
+    $statement = $db->prepare($query);
+
+    $statement->bindValue(':user_id', $user_id);
+    $statement->bindValue(':budget_category_id', $budgetId);
+    $statement->bindValue(':money_spent', 0);
+    $statement->bindValue(':date_payed', $end_date);
+
+    $statement->execute();
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -81,58 +141,15 @@ catch (PDOException $ex) {
     <!-- JUMBOTRON -->
     <div class="jumbotron">
       <div class="container">
-        <h1>Welcome <?php echo $_SESSION["username"]; ?>!</h1>
-        <p>Here are your current budgets:</p>
-        <?php
-
-          $statement = $db->prepare("SELECT budget_name, goal, sum(money_spent), u.user_id
-            FROM budgetCategories bc JOIN budget_expected be 
-            ON bc.id = be.budget_category_id
-            JOIN budget_actual ba ON be.budget_category_id = ba.budget_category_id
-            JOIN users u ON ba.user_id = u.user_id
-            WHERE u.user_name = $username GROUP BY budget_name, goal, u.user_id");
-          $statement->execute();
-          while ($row = $statement->fetch(PDO::FETCH_ASSOC))
-          {
-            $percent = ($row['sum'] / $row['goal']) * 100;
-            echo '<p>';
-            echo '<strong>' . $row['budget_name'] . '</strong></p><p> Money Spent - $' . $row['sum'] . ' Your goal is - $' . $row['goal'];
-            echo '</p>';
-            if ($percent <= 100) {
-            echo '<div class="progress">
-                    <div class="progress-bar progress-bar-success progress-bar-striped active" style="width:' . round($percent). '%;">
-                      ' . round($percent). '%
-                    </div>
-                  </div>';
-                } else {
-                  $percent = $percent - 100;
-                  echo '<div class="progress">
-                    <div class="progress-bar progress-bar-danger progress-bar-striped active" style="width:' . round($percent). '%;">
-                      ' . round($percent). '%
-                    </div>
-                  </div>';
-                }
-                $_SESSION["user_id"] = $row['user_id'];
-          }
-        ?>
+        <h1>Your budget has been created.</h1>
       </div>
     </div>
 
     <div class="container">
-    <div class="row">
       <div class="col-md-4">
-        <p>Do you want to view, add, or edit a budget?</p>
-        <a href="view-budgets.php" class="btn btn-primary">View Budgets</a>
-      </div>
-      <div class="col-md-4">
-        <p>Do you want to create a new budget?</p>
+        <p>Do you want to create another budget?</p>
         <a href="create-budgets.php" class="btn btn-primary">Create Budget</a>
       </div>
-      <div class="col-md-4">
-        <p>Do you want to delete a budget?</p>
-        <a href="delete-budgets.php" class="btn btn-primary">Delete Budget</a>
-      </div>
-    </div>
 
 
   <div style="height:400px"></div>

@@ -5,6 +5,7 @@ session_start();
 <?php
 // Set session variables
 $username =  '\'' . $_SESSION["username"] . '\'';
+$user_id = '\'' . $_SESSION["user_id"] . '\'';
 ?>
 
 <?php 
@@ -67,6 +68,7 @@ catch (PDOException $ex) {
             <li><a href="view-budgets.php">View Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="create-budgets.php">Create Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="delete-budgets.php">Delete Budgets<span class="sr-only">(current)</span></a></li>
+            <li><a href="logout.php">Log Out<span class="sr-only">(current)</span></a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -76,7 +78,7 @@ catch (PDOException $ex) {
     <div class="jumbotron">
       <div class="container">
         <h1>What Budget do you want to create?</h1>
-        <form>
+        <form method="post" action="insert-budget.php">
           <div class="form-group">
             <label>Budget Name</label>
             <input type="text" class="form-control" name="budget_name" placeholder="Budget Name">
@@ -84,12 +86,12 @@ catch (PDOException $ex) {
 
           <div class="form-group">
             <label>Monthly Budget Goal</label>
-            <input type="number" class="form-control" placeholder="$$$">
+            <input type="number" class="form-control" name="goal" placeholder="$$$">
           </div>
 
           <div class="form-group">
             <label>How long do you want to keep this budget?</label>
-            <select class="form-control">
+            <select class="form-control" name="end_date">
               <option value="Jan">January</option>
               <option value="Feb">February</option>
               <option value="Mar">March</option>

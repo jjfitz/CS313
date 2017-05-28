@@ -5,6 +5,7 @@ session_start();
 <?php
 // Set session variables
 $username =  '\'' . $_SESSION["username"] . '\'';
+$user_id = '\'' . $_SESSION["user_id"] . '\'';
 ?>
 
 <?php 
@@ -67,6 +68,7 @@ catch (PDOException $ex) {
             <li><a href="view-budgets.php">View Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="create-budgets.php">Create Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="delete-budgets.php">Delete Budgets<span class="sr-only">(current)</span></a></li>
+            <li><a href="logout.php">Log Out<span class="sr-only">(current)</span></a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -76,27 +78,49 @@ catch (PDOException $ex) {
     <div class="jumbotron">
       <div class="container">
         <h1>What Budgets do you want to delete?</h1>
-        <form>
         <?php
 
-          $statement = $db->prepare("SELECT budget_name 
-            FROM budget_categories bc 
+          $statement = $db->prepare("SELECT budget_name, id
+            FROM budgetCategories bc 
             JOIN users u ON bc.user_id = u.user_id
             WHERE u.user_name = $username");
           $statement->execute();
           while ($row = $statement->fetch(PDO::FETCH_ASSOC))
           {
             $name = $row['budget_name'];
-            echo "<div class='checkbox'>
-                    <label>
-                      <input type='checkbox' name='$name' value='$name'><strong>$name</strong>
-                    </label>
-                  </div>";
+            echo '<form method="post" action="delete.php">
+            <div class="form-group">
+                    <label>' . $name . '</label>
+                    <input type="hidden" name="id" value=' . $row['id'] . '>
+
+                  </div>
+                  <button type="submit" class="btn btn-danger">Delete</button>
+                  <div></div>
+                  </form>';
+
           }
         ?>
-        <button type="submit" class="btn btn-default">Delete</button>
 
-        </form>
+        <?php
+
+          /*$statement = $db->prepare("SELECT budget_name, id
+            FROM budgetCategories bc 
+            JOIN users u ON bc.user_id = u.user_id
+            WHERE u.user_name = $username");
+          $statement->execute();
+          while ($row = $statement->fetch(PDO::FETCH_ASSOC))
+          {
+            $name = $row['budget_name'];
+            echo '<form method="post" action="delete.php">
+            <div class="form-group">
+              <label>$name</label>
+              <input type="hidden" name="id" value=' . $row['id'] . '>
+            </div>
+            <button type="submit" class="btn btn-default">Delete</button>
+
+        </form>'
+          }*/
+        ?>
       </div>
     </div>
 

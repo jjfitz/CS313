@@ -5,6 +5,7 @@ session_start();
 <?php
 // Set session variables
 $username =  '\'' . $_SESSION["username"] . '\'';
+$user_id = '\'' . $_SESSION["user_id"] . '\'';
 ?>
 
 <?php 
@@ -67,6 +68,7 @@ catch (PDOException $ex) {
             <li><a href="view-budgets.php">View Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="create-budgets.php">Create Budgets<span class="sr-only">(current)</span></a></li>
             <li><a href="delete-budgets.php">Delete Budgets<span class="sr-only">(current)</span></a></li>
+            <li><a href="logout.php">Log Out<span class="sr-only">(current)</span></a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -78,18 +80,18 @@ catch (PDOException $ex) {
         <h1>Here are your current budgets:</h1>
         <?php
 
-          $statement = $db->prepare("SELECT budget_name, goal, money_spent 
-            FROM budget_categories bc JOIN budget_expected be 
-            ON bc.budget_category_id = be.budget_category_id
+          $statement = $db->prepare("SELECT budget_name, goal, sum(money_spent), bc.id
+            FROM budgetCategories bc JOIN budget_expected be 
+            ON bc.id = be.budget_category_id
             JOIN budget_actual ba ON be.budget_category_id = ba.budget_category_id
             JOIN users u ON ba.user_id = u.user_id
-            WHERE u.user_name = $username");
+            WHERE u.user_name = $username GROUP BY budget_name, goal, bc.id");
           $statement->execute();
           while ($row = $statement->fetch(PDO::FETCH_ASSOC))
           {
-            $percent = ($row['money_spent'] / $row['goal']) * 100;
+            $percent = ($row['sum'] / $row['goal']) * 100;
             echo '<p>';
-            echo '<strong>' . $row['budget_name'] . '</strong></p><p> Money Spent - $' . $row['money_spent'] . ' Your goal is - $' . $row['goal'];
+            echo '<strong>' . $row['budget_name'] . '</strong></p><p> Money Spent - $' . $row['sum'] . ' Your goal is - $' . $row['goal'];
             echo '</p>';
             if ($percent <= 100) {
             echo '<div class="progress">
@@ -97,6 +99,16 @@ catch (PDOException $ex) {
                       ' . round($percent). '%
                     </div>
                   </div>';
+            echo '<form method="post" action="add-money.php">
+                  <div class="form-group">
+                    <label>Add Money Towards Your Goal</label>
+                    <input type="number" class="form-control" name="money_spent" placeholder="$$$">
+                    <input type="hidden" name="id" value=' . $row['id'] .'>
+                  </div>
+
+                  <button type="submit" class="btn btn-default">Add Money</button>
+
+          </form>';
                 } else {
                   $percent = $percent - 100;
                   echo '<div class="progress">
@@ -104,6 +116,16 @@ catch (PDOException $ex) {
                       ' . round($percent). '%
                     </div>
                   </div>';
+                  echo '<form method="post" action="add-money.php">
+                  <div class="form-group">
+                    <label>Add Money Towards Your Goal</label>
+                    <input type="number" class="form-control" name="money_spent" placeholder="$$$">
+                    <input type="hidden" name="id" value=' . $row['id'] .'>
+                  </div>
+
+                  <button type="submit" class="btn btn-default">Add Money</button>
+
+          </form>';
                 }
           }
         ?>
