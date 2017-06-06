@@ -96,7 +96,7 @@ catch (PDOException $ex) {
                   </div>
                   <button type="submit" class="btn btn-danger">Delete</button>
                   <div></div>
-                  </form>';
+                  </form></br>';
 
           }
         ?>

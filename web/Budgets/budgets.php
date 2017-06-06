@@ -103,14 +103,14 @@ catch (PDOException $ex) {
                     <div class="progress-bar progress-bar-success progress-bar-striped active" style="width:' . round($percent). '%;">
                       ' . round($percent). '%
                     </div>
-                  </div>';
+                  </div></br></br>';
                 } else {
                   $percent = $percent - 100;
                   echo '<div class="progress">
                     <div class="progress-bar progress-bar-danger progress-bar-striped active" style="width:' . round($percent). '%;">
                       ' . round($percent). '%
                     </div>
-                  </div>';
+                  </div></br></br>';
                 }
                 $_SESSION["user_id"] = $row['user_id'];
           }

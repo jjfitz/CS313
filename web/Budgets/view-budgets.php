@@ -108,7 +108,7 @@ catch (PDOException $ex) {
 
                   <button type="submit" class="btn btn-default">Add Money</button>
 
-          </form>';
+          </form></br></br>';
                 } else {
                   $percent = $percent - 100;
                   echo '<div class="progress">
@@ -125,7 +125,7 @@ catch (PDOException $ex) {
 
                   <button type="submit" class="btn btn-default">Add Money</button>
 
-          </form>';
+          </form></br></br>';
                 }
           }
         ?>
